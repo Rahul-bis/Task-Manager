@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Manager</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: url("https://source.unsplash.com/1920x1080/?work,task")
+          no-repeat center center fixed;
+        background-size: cover;
+        color: #fff;
+        animation: fadeIn 1.5s ease-out; /* Fade-in effect on page load */
+      }
+      .container {
+        background: rgba(0, 0, 0, 0.7); /* Dark overlay for readability */
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        margin-top: 50px;
+        animation: slideUp 1s ease-out; /* Slide-up effect for the container */
+      }
+      h1 {
+        font-size: 2.5rem;
+        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+        opacity: 0;
+        animation: fadeInUp 1.2s forwards; /* Fade-in and move-up animation */
+      }
+      .btn-primary {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        border: none;
+        transition: background 0.3s ease;
+        animation: buttonScale 0.5s ease-out forwards; /* Button scale animation */
+      }
+      .btn-primary:hover {
+        background: linear-gradient(45deg, #0056b3, #003580);
+        transform: scale(1.1); /* Slightly scale up on hover */
+      }
+      .btn-primary:active {
+        transform: scale(1); /* Reset scale on click */
+      }
+      table {
+        background: rgba(255, 255, 255, 0.9);
+        color: #000;
+        border-radius: 8px;
+        animation: fadeInUp 1.5s ease-out;
+        table-layout: fixed; /* Ensures fixed width for columns */
+      }
+
+      th,
+      td {
+        text-align: center;
+        vertical-align: middle;
+        word-wrap: break-word; /* Breaks long words */
+        word-break: break-word; /* Breaks words if they are too long */
+        overflow-wrap: break-word; /* Ensures long words wrap within cells */
+      }
+
+      td {
+        white-space: normal; /* Allows text to wrap within the cell */
+      }
+
+      .btn-sm {
+        font-size: 0.9rem;
+        padding: 5px 10px;
+      }
+      .form-group input {
+        background: rgba(255, 255, 255, 0.8);
+        color: #333;
+        transition: transform 0.3s ease-in-out;
+      }
+      .form-group input:focus {
+        transform: scale(1.05); /* Slight scale on focus */
+        box-shadow: 0 0 10px rgba(0, 0, 255, 0.7); /* Blue glow on focus */
+      }
+      .form-group label {
+        color: #f8f9fa;
+      }
+      .alert-info {
+        max-width: 80%;
+        margin: 20px auto;
+        opacity: 0;
+        animation: fadeIn 1.5s ease-out forwards; /* Fade-in animation for jokes */
+      }
+
+      /* Keyframe animations */
+      @keyframes fadeIn {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeInUp {
+        0% {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideUp {
+        0% {
+          transform: translateY(50px);
+          opacity: 0;
+        }
+        100% {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes buttonScale {
+        0% {
+          transform: scale(1);
+        }
+        100% {
+          transform: scale(1.05);
+        }
+      }
+
+      /* Table row hover animation */
+      tr:hover {
+        background-color: rgba(0, 123, 255, 0.1); /* Highlight on hover */
+        transform: scale(1.02); /* Slightly scale up */
+        transition: transform 0.2s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="text-center mb-4" id="task-manager-link">Task Manager</h1>
+
+      <div id="joke-container" class="text-center mt-4"></div>
+
+      <script>
+        document
+          .getElementById("task-manager-link")
+          .addEventListener("click", function (event) {
+            event.preventDefault();
+
+            // Fetch joke using AJAX
+            fetch("{% url 'pop_jokes' %}")
+              .then((response) => response.json())
+              .then((data) => {
+                document.getElementById("joke-container").innerHTML =
+                  '<div class="alert alert-info">' + data.joke + "</div>";
+              })
+              .catch((error) => console.error("Error fetching joke:", error));
+          });
+      </script>
+
+      <!-- Add Task Button and Text to Speech Form -->
+      <div class="d-flex justify-content-between mb-3">
+        <a href="{% url 'add_task' %}" class="btn btn-primary"
+          >+ Add New Task</a
+        >
+        <form
+          method="get"
+          action="{% url 'text_speech' %}"
+          class="d-inline-flex"
+        >
+          <div class="form-group me-2">
+            <label for="text" class="form-label">Enter Text for Speech:</label>
+            <input
+              type="text"
+              id="text"
+              name="text"
+              class="form-control"
+              placeholder="Enter your text"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Text to Speech</button>
+        </form>
+      </div>
+
+      <!-- Tasks Table -->
+      <table class="table table-hover table-bordered">
+        <thead class="table-dark">
+          <tr>
+            <th style="width: 15%">Title</th>
+            <th style="width: 23%">Description</th>
+            <th style="width: 10%">Priority</th>
+            <th style="width: 10%">Category</th>
+            <th style="width: 10%">Time Required</th>
+            <th style="width: 10%">Completed</th>
+            <th style="width: 22%">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in tasks %}
+          <tr>
+            <td>{{ task.title }}</td>
+            <td>{{ task.description }}</td>
+            <td>{{ task.priority }}</td>
+            <td>{{ task.category }}</td>
+            <td>{{ task.time_req }}</td>
+            <td>{{ task.completed|yesno:"✔️,❌" }}</td>
+            <td>
+              {% if not task.completed %}
+              <a
+                href="{% url 'mark_completed' task.id %}"
+                class="btn btn-success btn-sm"
+                >Mark Completed</a
+              >
+              {% endif %}
+              <a
+                href="{% url 'delete_task' task.id %}"
+                class="btn btn-danger btn-sm"
+                >Delete</a
+              >
+              <a
+                href="{% url 'edit_task' task.id %}"
+                class="btn btn-warning btn-sm"
+                >Edit</a
+              >
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+  </body>
+</html>
